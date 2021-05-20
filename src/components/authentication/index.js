@@ -1,20 +1,42 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, {useState, useRef, useEffect} from 'react'
 import {Link, NavLink} from "react-router-dom";
-
+import axios from "axios";
 
 const Authentication = () => {
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
-	const emailRef = useRef(null)
+	const [isSubmitting, setIsSubmitting] = useState(false)
+	// const emailRef = useRef(null)
+	
 	
 	const handleSubmit = (e) => {
 		e.preventDefault()
-		console.log('data:',email, password)
+		setIsSubmitting(true)
+		console.log('data:', email, password)
 	}
 	
 	useEffect(() => {
+		if(!setIsSubmitting) {
+			return
+		}
 		console.log('effect was triggered')
-	}, [])
+		axios('https://conduit.productionready.io/api/users/login', {
+			method: "post",
+			data: {
+				user: {
+					email: 'test@ggg.com',
+					password: 51551515
+				}
+			}
+		}).then(res => {
+				setIsSubmitting(false)
+				console.log('success', res)
+			})
+			.catch(error => {
+				setIsSubmitting(false)
+				console.error('CaughtError::', error)
+			})
+	})
 	return (
 		<div className='auth-page'>
 			
@@ -25,15 +47,13 @@ const Authentication = () => {
 						<p className='text-xs-center'>
 							<Link to='register'>Need an account</Link>
 						</p>
-						<form
-							onSubmit={ handleSubmit }
-						>
+						<form onSubmit={handleSubmit}>
 							<fieldset>
 								<fieldset className='form-group'>
 									<input type='email'
 												 className='form-control form-control-lg'
 												 placeholder='Email'
-												 // ref={ emailRef }
+										// ref={ emailRef }
 												 value={email}
 												 onChange={e => setEmail(e.target.value)}
 									/>
@@ -51,6 +71,7 @@ const Authentication = () => {
 								<button
 									className='btn btn-lg btn-outline-primary pull-xs-right'
 									type='submit'
+									disabled={isSubmitting}
 								>
 									Sign in
 								</button>
